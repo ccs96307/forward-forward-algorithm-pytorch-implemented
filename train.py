@@ -1,10 +1,11 @@
 # coding: utf-8
+from sklearn import metrics
 import torch
 from tqdm import tqdm
 
 from dataloader import get_mnist_dataloader
 from ffmodel import FFClassifier
-from utils import AverageMeter, create_pos_data, create_neg_data
+from utils import AverageMeter, create_pos_data, create_neg_data, create_test_data
 
 torch.manual_seed(2999)
 
@@ -16,12 +17,15 @@ def main() -> None:
 
     # DataLoader
     train_dataloader = get_mnist_dataloader(_mode="train", batch_size=batch_size)
-    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=batch_size)
-    test_dataloader = get_mnist_dataloader(_mode="test", batch_size=batch_size)
+    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=1)
+
+    # Device
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
     
     # FFModel
-    model = FFClassifier([28*28, 2000, 2000, 2000, 2000])
-
+    model = FFClassifier([28*28, 2000, 2000, 2000, 2000], device=device)
+    torch.compile(model)
+    
     # Loss Logger
     loss_logger = AverageMeter()
 
@@ -32,8 +36,8 @@ def main() -> None:
         loss_logger.reset()
 
         for inputs, labels in pbar:
-            pos_inputs = create_pos_data(inputs, labels)
-            neg_inputs = create_neg_data(inputs, labels)
+            pos_inputs = create_pos_data(inputs, labels).to(device)
+            neg_inputs = create_neg_data(inputs, labels).to(device)
 
             loss = model(pos_inputs, neg_inputs)
             loss_logger.update(loss, inputs.shape[0])
@@ -43,20 +47,20 @@ def main() -> None:
 
         # Validation
         model.eval()
-        pbar = tqdm(val_dataloader, desc=f"Valid - Epoch [{epoch}/{num_epochs}] Loss: {loss_logger.avg:.4f}")
-        loss_logger.reset()
 
-        for inputs, labels in pbar:
-            pos_inputs = create_pos_data(inputs, labels)
-            neg_inputs = create_neg_data(inputs, labels)
+        # Evaluation
+        predicts = []
+        targets = []
+        for inputs, labels in tqdm(val_dataloader):
+            inputs_all_labels = create_test_data(inputs).to(device)
 
-            with torch.no_grad():
-                loss = model(pos_inputs, neg_inputs, train_mode=False)
+            predict = model.predict(inputs_all_labels)
+            predicts.append(predict.item())
+            targets.append(labels.item())
 
-            loss_logger.update(loss, inputs.shape[0])
-            pbar.set_description(f"Valid - Epoch [{epoch}/{num_epochs}] Loss: {loss_logger.avg:.4f}")
-
+        print(metrics.classification_report(targets, predicts))
         print()
+
 
 if __name__ == "__main__":
     main()

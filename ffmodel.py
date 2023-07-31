@@ -68,15 +68,17 @@ class FFLinear(nn.Linear):
 
         return pos_outputs.detach(), neg_outputs.detach(), loss.detach()
     
-
+    
+# TODO: This replemented cannot convert into DEVICE we set...
 class FFClassifier(torch.nn.Module):
-    def __init__(self, dims: List[int]) -> None:
+    def __init__(self, dims: List[int], device: str) -> None:
         super().__init__()
         self.layers = [
             FFLinear(
                 in_features=dims[i],
                 out_features=dims[i+1],
                 lr=0.01,
+                device=device,
             ) for i in range(len(dims)-1)
         ]
         

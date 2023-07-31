@@ -11,19 +11,19 @@ torch.manual_seed(2999)
 
 def main() -> None:
     # DataLoader
-    # train_dataloader = get_mnist_dataloader(_mode="train", batch_size=16)
-    # val_dataloader = get_mnist_dataloader(_mode="val", batch_size=16)
     test_dataloader = get_mnist_dataloader(_mode="test", batch_size=1)
+
+    # Device
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
     
     # FFModel
-    # model = FFClassifier([28*28, 2000, 2000, 2000, 2000])
-    model = torch.load("./models/epoch80.ckpt")
+    model = torch.load("./models/epoch31.ckpt").eval()
 
     # Evaluation
     predicts = []
     targets = []
     for inputs, labels in tqdm(test_dataloader):
-        inputs_all_labels = create_test_data(inputs)
+        inputs_all_labels = create_test_data(inputs).to(device)
 
         predict = model.predict(inputs_all_labels)
         predicts.append(predict.item())
