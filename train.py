@@ -36,10 +36,11 @@ def main() -> None:
         loss_logger.reset()
 
         for inputs, labels in pbar:
+            break
             pos_inputs = create_pos_data(inputs, labels).to(device)
             neg_inputs = create_neg_data(inputs, labels).to(device)
 
-            loss = model(pos_inputs, neg_inputs)
+            loss = model(pos_inputs=pos_inputs, neg_inputs=neg_inputs, pos_labels=labels)
             loss_logger.update(loss, inputs.shape[0])
             pbar.set_description(f"Train - Epoch [{epoch}/{num_epochs}] Loss: {loss_logger.avg:.4f}")
 
@@ -55,7 +56,8 @@ def main() -> None:
             inputs_all_labels = create_test_data(inputs).to(device)
 
             predict = model.predict(inputs_all_labels)
-            predicts.append(predict.item())
+            
+            predicts.extend(predict.tolist())
             targets.append(labels.item())
 
         print(metrics.classification_report(targets, predicts))
