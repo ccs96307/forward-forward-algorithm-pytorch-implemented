@@ -57,7 +57,7 @@ def main() -> None:
             predict = model.predict(inputs)
             
             predicts.extend(predict.tolist())
-            targets.append(labels.item())
+            targets.extend(labels.tolist())
 
         print(metrics.classification_report(targets, predicts))
         print()
