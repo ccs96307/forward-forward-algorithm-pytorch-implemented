@@ -17,7 +17,7 @@ def main() -> None:
 
     # DataLoader
     train_dataloader = get_mnist_dataloader(_mode="train", batch_size=batch_size)
-    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=16)
+    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=1)
 
     # Device
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -38,9 +38,8 @@ def main() -> None:
         for inputs, labels in pbar:
             pos_inputs = create_pos_data(inputs, labels).to(device)
             neg_inputs = create_neg_data(inputs, labels).to(device)
-            labels = labels.to(device)
 
-            loss = model(pos_inputs=pos_inputs, neg_inputs=neg_inputs, pos_labels=labels)
+            loss = model(pos_inputs=pos_inputs, neg_inputs=neg_inputs)
             loss_logger.update(loss, inputs.shape[0])
             pbar.set_description(f"Train - Epoch [{epoch}/{num_epochs}] Loss: {loss_logger.avg:.4f}")
 
@@ -53,11 +52,11 @@ def main() -> None:
         predicts = []
         targets = []
         for inputs, labels in tqdm(val_dataloader):
-            inputs = inputs.to(device)
+            inputs = create_test_data(inputs).to(device)
             predict = model.predict(inputs)
             
-            predicts.extend(predict.tolist())
-            targets.extend(labels.tolist())
+            predicts.append(predict.item())
+            targets.append(labels.item())
 
         print(metrics.classification_report(targets, predicts))
         print()
