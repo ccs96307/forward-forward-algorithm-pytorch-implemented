@@ -103,6 +103,5 @@ class FFClassifier(torch.nn.Module):
             if idx > 0:
                 goodness += inputs.pow(2).mean(1)
 
-        print(goodness)
         return torch.argmax(goodness)
 
