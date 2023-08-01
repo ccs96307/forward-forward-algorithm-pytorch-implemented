@@ -36,9 +36,9 @@ def main() -> None:
         loss_logger.reset()
 
         for inputs, labels in pbar:
-            break
             pos_inputs = create_pos_data(inputs, labels).to(device)
             neg_inputs = create_neg_data(inputs, labels).to(device)
+            labels = labels.to(device)
 
             loss = model(pos_inputs=pos_inputs, neg_inputs=neg_inputs, pos_labels=labels)
             loss_logger.update(loss, inputs.shape[0])

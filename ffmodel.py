@@ -82,7 +82,7 @@ class FFClassifier(torch.nn.Module):
             ) for i in range(len(dims)-1)
         ]
 
-        self.classify_layer = torch.nn.Linear(dims[-1], 10)
+        self.classify_layer = torch.nn.Linear(dims[-1], 10).to(device)
         self.criterion = torch.nn.CrossEntropyLoss(label_smoothing=0.1)
         self.optimizer = torch.optim.AdamW(self.classify_layer.parameters(), lr=0.01)
         self.softmax = torch.nn.Softmax(dim=1)
