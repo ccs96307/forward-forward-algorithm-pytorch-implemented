@@ -17,7 +17,7 @@ def main() -> None:
 
     # DataLoader
     train_dataloader = get_mnist_dataloader(_mode="train", batch_size=batch_size)
-    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=1)
+    val_dataloader = get_mnist_dataloader(_mode="val", batch_size=16)
 
     # Device
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -53,9 +53,9 @@ def main() -> None:
         predicts = []
         targets = []
         for inputs, labels in tqdm(val_dataloader):
-            inputs_all_labels = create_test_data(inputs).to(device)
+            # inputs_all_labels = create_test_data(inputs).to(device)
 
-            predict = model.predict(inputs_all_labels)
+            predict = model.predict(inputs)
             
             predicts.extend(predict.tolist())
             targets.append(labels.item())
