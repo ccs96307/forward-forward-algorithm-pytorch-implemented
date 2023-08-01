@@ -53,8 +53,7 @@ def main() -> None:
         predicts = []
         targets = []
         for inputs, labels in tqdm(val_dataloader):
-            # inputs_all_labels = create_test_data(inputs).to(device)
-
+            inputs = inputs.to(device)
             predict = model.predict(inputs)
             
             predicts.extend(predict.tolist())
