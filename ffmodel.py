@@ -31,7 +31,7 @@ class FFLinear(nn.Linear):
         self.relu = torch.nn.ReLU()
 
     def linear_transform(self, inputs: torch.Tensor) -> torch.Tensor:
-        # L2 Norm & smoothy TODO: why???
+        # L2 Norm & smoothy
         inputs_l2_norm = inputs.norm(2, 1, keepdim=True) + 1e-4
         
         # Normalization
