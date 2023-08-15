@@ -67,9 +67,8 @@ class FFLinear(nn.Linear):
             self.optimizer.step()
 
         return pos_outputs.detach(), neg_outputs.detach(), loss.detach()
-    
-    
-# TODO: This replemented cannot convert into DEVICE we set...
+
+
 class FFClassifier(torch.nn.Module):
     def __init__(self, dims: List[int], device: str) -> None:
         super().__init__()
@@ -81,6 +80,7 @@ class FFClassifier(torch.nn.Module):
                 device=device,
             ) for i in range(len(dims)-1)
         ]
+        self.dropout = torch.nn.Dropout(p=0.3)
         
     def forward(
         self,
@@ -91,6 +91,8 @@ class FFClassifier(torch.nn.Module):
         total_loss = 0.0
         for layer in self.layers:
             pos_inputs, neg_inputs, loss = layer(pos_inputs, neg_inputs, train_mode)
+            pos_inputs = self.dropout(pos_inputs)
+            neg_inputs = self.dropout(neg_inputs)
             total_loss += loss.item()
 
         return total_loss
